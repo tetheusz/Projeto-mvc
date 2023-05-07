@@ -13,6 +13,7 @@ public class AlunoDAO {
 		private Connection conn;
 		// para rodar SQL
 		private PreparedStatement ps;
+		private PreparedStatement ps2;
 		// tabela
 		ResultSet rs;
 		Aluno aluno;
@@ -35,7 +36,7 @@ public class AlunoDAO {
 			try {
 				String SQL = "INSERT INTO aluno (rgm, "
 						+ "nome, datanascimento, cpf, email,"
-						+ "endereco, municipio, uf, celular, curso, campus, periodo, disciplina, semestre, nota, faltas) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+						+ "endereco, municipio, uf, celular) values (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 				ps = conn.prepareStatement(SQL);
 				ps.setString(1, aluno.getRgm());
 				ps.setString(2, aluno.getNome());
@@ -46,14 +47,16 @@ public class AlunoDAO {
 				ps.setString(7, aluno.getMunicipio());
 				ps.setString(8, aluno.getUf());
 				ps.setString(9, aluno.getCelular());
-				ps.setString(10, "");
-				ps.setString(11, "");
-				ps.setString(12, "");
-				ps.setString(13, "");
-				ps.setString(14, "");
-				ps.setString(15, "");
-				ps.setString(16, "");
 				ps.executeUpdate();
+				
+				String SQL2 = "INSERT INTO curso (rgm_aluno, curso, campus, periodo) values (?, ?, ?, ?)";
+				ps2 = conn.prepareStatement(SQL2);
+				ps2.setString(1, aluno.getRgm());
+				ps2.setString(2, "");
+				ps2.setString(3, "");
+				ps2.setString(4, "");
+				ps2.executeUpdate();
+				
 			} catch (SQLException sqle) {
 				throw new Exception("Erro ao inserir dados " + sqle);
 			} finally {
@@ -65,20 +68,18 @@ public class AlunoDAO {
 			if (aluno == null)
 				throw new Exception("O valor passado nao pode ser nulo");
 			try {
-				String SQL = "UPDATE tbAluno SET nome=?"
-						+ ", email=?, datanascimento=?, "
-						+ "idade=?,endereco=? WHERE rgm=?";
-				ps = conn.prepareStatement(SQL);
+				String SQL = "UPDATE aluno SET nome = ?, datanascimento =?, cpf=?, email=?,"
+						+ "endereco=?, municipio=?, uf=?, celular=?  WHERE rgm=?";
+				ps = conn.prepareStatement(SQL);;				
 				ps.setString(1, aluno.getNome());
-				ps.setString(2, aluno.getEmail());
-				ps.setString(3, aluno.getDtNascimento());
-				ps.setString(4, aluno.getNome());
+				ps.setString(2, aluno.getDtNascimento());
+				ps.setString(3, aluno.getCpf());
+				ps.setString(4, aluno.getEmail());
 				ps.setString(5, aluno.getEndereco());
-				ps.setString(6, aluno.getRgm());
-				ps.setString(7, aluno.getCelular());
-				ps.setString(8, aluno.getCpf());
-				ps.setString(9, aluno.getMunicipio());
-				ps.setString(10, aluno.getUf());
+				ps.setString(6, aluno.getMunicipio());
+				ps.setString(7, aluno.getUf());
+				ps.setString(8, aluno.getCelular());
+				ps.setString(9, aluno.getRgm());
 				ps.executeUpdate();
 			} catch (SQLException sqle) {
 				throw new Exception("Erro ao atualizar dados " + sqle);
@@ -87,28 +88,32 @@ public class AlunoDAO {
 			}
 		}
 		// Excluir
-		public void excluir(Aluno aluno) throws Exception {
+		public Aluno excluir(Aluno aluno) throws Exception {
 			if (aluno == null)
 				throw new Exception("O valor passado nao pode ser nulo");
 			try {
-				String SQL = "DELETE FROM tbAluno WHERE rgm=?";
-				ps = conn.prepareStatement(SQL);
-				ps.setString(1, aluno.getRgm());
-				ps.executeUpdate();
+		        String SQL = "DELETE FROM aluno WHERE rgm=?";
+		        ps = conn.prepareStatement(SQL);
+		        ps.setString(1, aluno.getRgm());
+		        int rowsAffected = ps.executeUpdate();
+		        if (rowsAffected == 0) {
+		            throw new Exception("Nenhum aluno encontrado com o RGM informado");
+		        }
+
 			} catch (SQLException sqle) {
 				throw new Exception("Erro ao excluir dados " + sqle);
 			} finally {
 				SqlConnection.closeConnection(conn, ps);
 			}
+			return aluno;
 		}
 
 		// Consultar
 		public Aluno consultar(Aluno a) throws Exception {
 			if (a == null)
 				throw new Exception("O valor passado nao pode ser nulo");
-			try {
-				
-				String SQL = "SELECT * FROM aluno WHERE rgm=?";
+			try {				
+				String SQL = "SELECT * FROM aluno, curso WHERE rgm=?";
 				ps = conn.prepareStatement(SQL);
 				ps.setString(1, a.getRgm());
 				rs = ps.executeQuery();
@@ -122,14 +127,89 @@ public class AlunoDAO {
 					String dtNascimento = rs.getString("datanascimento");
 					String celular = rs.getString("celular");
 					String cpf = rs.getString("cpf");
-					aluno = new Aluno(nome,rgm,email,endereco,municipio,uf,dtNascimento,celular,cpf);
-				}
+					String curso = rs.getString("curso");
+					String campus = rs.getString("campus");
+					String periodo = rs.getString("periodo");
+					aluno = new Aluno(nome,rgm,email,endereco,municipio,uf,dtNascimento,celular,cpf,curso,campus,periodo);
+								}
 				return aluno;
 			} catch (SQLException sqle) {
 				throw new Exception("Erro ao consultar dados " + sqle);
 			} finally {
 				SqlConnection.closeConnection(conn, ps);
 			}
+		}
+		
+		
+		// Aba de cursos
+		public void salvarCurso(Aluno aluno) throws Exception {
+			if (aluno == null)
+				throw new Exception("O valor passado nao pode ser nulo");
+			try {
+				String SQL = "UPDATE curso SET campus = ?, curso = ?, periodo = ? WHERE rgm_aluno=?";
+				ps = conn.prepareStatement(SQL);
+				ps.setString(1, aluno.getCampus());
+				ps.setString(2, aluno.getCurso());
+				ps.setString(3, aluno.getPeriodo());
+				ps.setString(4, aluno.getRgm());
+				ps.executeUpdate();
+				
+			} catch (SQLException sqle) {
+				throw new Exception("Erro ao inserir dados " + sqle);
+			} finally {
+				SqlConnection.closeConnection(conn, ps);
+			}
+		}
+		
+		
+		public Aluno consultarCurso(Aluno a) throws Exception {
+			if (a == null)
+				throw new Exception("O valor passado nao pode ser nulo");
+			try {				
+				String SQL = "SELECT * FROM aluno,curso WHERE rgm_aluno=?";
+				ps = conn.prepareStatement(SQL);
+				ps.setString(1, a.getRgm());
+				rs = ps.executeQuery();
+				if(rs.next()) {
+					String rgm = rs.getString("rgm_aluno");
+					String nome = rs.getString("nome");
+					String email = rs.getString("email");
+					String endereco = rs.getString("endereco");
+					String municipio = rs.getString("municipio");
+					String uf = rs.getString("uf");
+					String dtNascimento = rs.getString("datanascimento");
+					String celular = rs.getString("celular");
+					String cpf = rs.getString("cpf");
+					String curso = rs.getString("curso");
+					String campus = rs.getString("campus");
+					String periodo = rs.getString("periodo");
+					aluno = new Aluno(nome,rgm,email,endereco,municipio,uf,dtNascimento,celular,cpf,curso,campus,periodo);
+								}
+				return aluno;
+			} catch (SQLException sqle) {
+				throw new Exception("Erro ao consultar dados " + sqle);
+			} finally {
+				SqlConnection.closeConnection(conn, ps);
+			}
+		}
+		
+		public Aluno excluirCurso(Aluno aluno) throws Exception {
+			if (aluno == null)
+				throw new Exception("O valor passado nao pode ser nulo");
+			try {
+		        String SQL = "UPDATE curso SET campus = '', curso = '', periodo = '' WHERE rgm_aluno=?";
+		        ps = conn.prepareStatement(SQL);
+		        ps.setString(1, aluno.getRgm());
+		        int rowsAffected = ps.executeUpdate();
+		        if (rowsAffected == 0) {
+		            throw new Exception("Nenhum curso encontrado para o aluno com o RGM informado");
+		        }
+			} catch (SQLException sqle) {
+				throw new Exception("Erro ao excluir dados " + sqle);
+			} finally {
+				SqlConnection.closeConnection(conn, ps);
+			}
+			return aluno;
 		}
 
 }

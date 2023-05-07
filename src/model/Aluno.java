@@ -10,7 +10,22 @@ public class Aluno {
 	private String nome;
 	private String celular;
 	private String cpf;
+	private String curso;
+	private String campus;
+	private String periodo;
 	
+	public void setCurso(String curso) {
+		this.curso = curso;
+	}
+
+	public void setCampus(String campus) {
+		this.campus = campus;
+	}
+
+	public void setPeriodo(String periodo) {
+		this.periodo = periodo;
+	}
+
 	public void setNome(String nome) {
 		this.nome = nome;
 	}
@@ -49,7 +64,7 @@ public class Aluno {
 	}
 	
 	
-	public Aluno(String nome, String rgm, String email, String endereco, String municipio, String uf, String dtNascimento, String celular, String cpf) {
+	public Aluno(String nome, String rgm, String email, String endereco, String municipio, String uf, String dtNascimento, String celular, String cpf, String curso, String campus, String periodo) {
 		this.rgm = rgm;
 		this.nome = nome;
 		this.email = email;
@@ -59,6 +74,9 @@ public class Aluno {
 		this.uf = uf;
 		this.celular = celular;
 		this.cpf = cpf;
+		this.curso = curso;
+		this.campus = campus;
+		this.periodo = periodo;
 	}
 	
 	public Aluno() {
@@ -95,5 +113,14 @@ public class Aluno {
 	}
 	public String getDtNascimento() {
 		return dtNascimento;
+	}
+	public String getCurso() {
+		return curso;
+	}
+	public String getCampus() {
+		return campus;
+	}
+	public String getPeriodo() {
+		return periodo;
 	}
 }
