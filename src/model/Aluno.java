@@ -13,6 +13,13 @@ public class Aluno {
 	private String curso;
 	private String campus;
 	private String periodo;
+	private String nota;
+	private String faltas;
+	private String semestre;
+	private String disciplina;
+
+
+
 	
 	public void setCurso(String curso) {
 		this.curso = curso;
@@ -122,5 +129,37 @@ public class Aluno {
 	}
 	public String getPeriodo() {
 		return periodo;
+	}
+
+	public String getNota() {
+		return nota;
+	}
+
+	public void setNota(String nota) {
+		this.nota = nota;
+	}
+
+	public String getSemestre() {
+		return semestre;
+	}
+
+	public void setSemestre(String semestre) {
+		this.semestre = semestre;
+	}
+
+	public String getFaltas() {
+		return faltas;
+	}
+
+	public void setFaltas(String faltas) {
+		this.faltas = faltas;
+	}
+
+	public String getDisciplina() {
+		return disciplina;
+	}
+
+	public void setDisciplina(String disciplina) {
+		this.disciplina = disciplina;
 	}
 }
